@@ -1,5 +1,8 @@
 # Extracting diffusion profiles of particles in slit pores
 
+[![DOI](https://zenodo.org/badge/575549132.svg)](https://zenodo.org/badge/latestdoi/575549132)
+
+
 This repository contains scripts and cached calculation results for the analysis of anisotropic interface-perpendicular diffusion in film geometries and slit pores.
 It most notably contains the scripts to calculate the universal correction function `R(\nu,q)` as presented in the accompanying publication: (TODO: add DOI and bibtex).
 The scripts are provided free of charge, as-is to be used in scientific work and educational context. 
