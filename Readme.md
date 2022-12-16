@@ -1,7 +1,7 @@
-# Scripts and cached calculation results for analysis of anisotropic interface-perpendicular diffusion
+# Extracting diffusion profiles of particles in slit pores
 
-This repository contains the scripts to calculate the universal correction function `R(\nu,q)` as presented in the accompanying publication: (TODO: add DOI and bibtex).
-
+This repository contains scripts and cached calculation results for the analysis of anisotropic interface-perpendicular diffusion in film geometries and slit pores.
+It most notably contains the scripts to calculate the universal correction function `R(\nu,q)` as presented in the accompanying publication: (TODO: add DOI and bibtex).
 The scripts are provided free of charge, as-is to be used in scientific work and educational context. 
 
 If you use the technique presented in the accompanying publication or the scripts in this repository for your own publication, please cite:
