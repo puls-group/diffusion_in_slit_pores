@@ -16,16 +16,12 @@ rel_lt = None
 local_cache_path = "./cache/local_lv_correction.cache"
 
 
-"""
-TODO: replace with LV calculation code
-
-def simulate_fpe_for(
-    rel_displacement: float,
-    rel_D_displacement: float,
-    dx=0.01,
-    dt=0.1,
-    return_detailed_stats=False,
-):
+def simulate_fpe_for(rel_displacement: float,
+                     rel_D_displacement: float,
+                     dx: float = 0.01,
+                     dt: float = 0.1,
+                     return_detailed_stats: bool = False,
+                     ):
     # We set the slab width to 1 to simplify the model, everything scales relatively, so that's fine
     slab_width = 1
 
@@ -36,14 +32,14 @@ def simulate_fpe_for(
     # Total dimension of the domain in d direction accounting for both signs of displacement
     dim_s = 2 * dim_d + 1
     # Total dimension in z direction accounting for tilted shape
-    total_z = dim_z + dim_s + 2
+    total_z = dim_z + dim_d + 1
     total_entry = dim_s * total_z
 
     # Set the diffusion parameters for the simulation
     D_translational = 1
     D_displacement = rel_D_displacement
 
-    lt_translational_estimate = 1.0 / 12.0 * slab_width ** 2 / D_translational
+    lt_translational_estimate = 1./3. * slab_width**2 / D_translational
 
     print(D_translational, D_displacement, slab_width, rel_displacement)
 
@@ -53,43 +49,74 @@ def simulate_fpe_for(
     D_translational /= dx * dx
     D_displacement /= dx * dx
 
-    dt = min(dt, lt_translational_estimate / 100.0)
+    dt = min(dt, lt_translational_estimate/100.)
 
     total_norm = 0.0
     # initialize domain
     for s in range(dim_s):
-        start_off = s + 1
-        domain[s, start_off: (start_off + dim_z)] = 1.0
-        mask[s, start_off: (start_off + dim_z)] = 1.0
-        total_norm += dim_z
+        if s <= dim_d:
+            start_off = 0
+            end = dim_z - (dim_d - s)
+            domain[s, start_off:end] = 1.0
+            mask[s, start_off:end] = 1.0
+            total_norm += end
+        else:
+            start_off = s - dim_d
+            domain[s, start_off: (start_off + dim_z)] = 1.0
+            mask[s, start_off: (start_off + dim_z)] = 1.0
+            total_norm += dim_z
 
     def fpe_diff(t, cy):
-        # global D_translational, D_displacement, dim_s, total_z, total_entry
         y = cy.reshape((dim_s, total_z))
-        diff = y * 0.0
+        diff_s = y * 0.0
+        diff_z = y * 0.0
 
         s_up = y[2:]
         s_mid = y[1:-1]
         s_down = y[:-2]
-        diff_s_mid = s_up - 2 * s_mid + s_down
-        diff[1:-1] += D_displacement * diff_s_mid
+        diff_s[1:-1] = D_displacement * (s_up - 2 * s_mid + s_down)
 
-        # FIXME: No factor 2 because there is only flow in one of two possible directions?
-        # diff[0] += 2.0 * D_displacement * (y[1] - y[0])
-        diff[0] += D_displacement * (y[1] - y[0])
-        # diff[-1] += 2.0 * D_mol * (y[-2] - y[-1])
-        diff[-1] += D_displacement * (y[-2] - y[-1])
+        diff_s[0] = D_displacement * (y[1] - y[0])
+        diff_s[-1] = D_displacement * (y[-2] - y[-1])
 
         z_up = y[:, 2:]
         z_mid = y[:, 1:-1]
         z_down = y[:, :-2]
-        diff[:, 1:-1] += D_translational * (z_up - 2 * z_mid + z_down)
+        diff_z[:, 1:-1] = D_translational * (z_up - 2 * z_mid + z_down)
 
-        diff = diff * mask
+        diff_z[:, 0] = D_translational * (y[:, 1] - y[:, 0])
+
+        # Deal with diagonal boundary:
+        for i in range(1, dim_d):
+            s = dim_d + i
+            z = i
+            W0 = y[s, z]
+            W1 = y[s - 1, z]
+            W2 = y[s, z + 1]
+            W3 = y[s + 1, z + 1]
+            W4 = y[s - 1, z - 1]
+
+            g = (D_displacement * (W3 - W4)) / \
+                (2.0 * (D_displacement + D_translational))
+
+            # FIXME: No factor 2 because there is only flow in one of two possible directions?
+            # diff_z[s, z] = 2.0 * D_t * ((W2 - W0) - g)
+            diff_z[s, z] = D_translational * (W2 - W0) - D_translational * g
+            # diff_s[s, z] = 2.0 * D_displacement * (W1 - W0) - D_t * g
+            diff_s[s, z] = D_displacement * (W1 - W0) - D_translational * g
+
+        # Deal with z-reflection at left side bottom corner
+        # FIXME: No factor 2 because there is only flow in one of two possible directions?
+        # diff_z[-1, dim_d] = 2.0 * D_translational * (y[-1, dim_d + 1] - y[-1, dim_d])
+        diff_z[-1, dim_d] = D_translational * (y[-1, dim_d + 1] - y[-1, dim_d])
+
+        # Deal with s-reflection at left side middle corner
+        # FIXME: No factor 2 because there is only flow in one of two possible directions?
+        # diff_z[-1, dim_d] = 2.0 * D_t * (y[-1, dim_d + 1] - y[-1, dim_d])
+        diff_s[dim_d, 0] = D_translational * (y[dim_d-1, 0] - y[dim_d, 0])
+
+        diff = (diff_s + diff_z) * mask
         return diff.reshape((total_entry,))
-
-    # print(total_norm, np.sum(domain))
-    # sys.exit(1)
 
     t0 = 0.0
     y0 = domain.reshape((total_entry,))
@@ -98,7 +125,6 @@ def simulate_fpe_for(
     max_step = dt
 
     print(lt_translational_estimate)
-    # sys.exit()
 
     last_report = 0.0
     report_step = t_bound / 100.0
@@ -108,12 +134,10 @@ def simulate_fpe_for(
     total_lifetime_integral = 0.0
 
     FPE = sp_int.RK45(fpe_diff, t0, y0, t_bound=t_bound, max_step=max_step)
-    # pprint(FPE.__dict__)
     print(FPE.status)
 
     while True:
         status_update = FPE.step()
-        # pprint(FPE.__dict__)
         curr_p = np.sum(FPE.y) / total_norm
 
         total_lifetime_integral += (
@@ -149,18 +173,11 @@ def simulate_fpe_for(
     est_total_time += np.exp(f_lin(sim_lt[-1])) / coeff[1]
     rel_total_time = est_total_time / lt_translational_estimate
 
-    print(est_total_time, "/", lt_translational_estimate, "=", rel_total_time)
-
     if return_detailed_stats:
-        return (
-            rel_total_time,
-            FPE.t / lt_translational_estimate,
-            (sim_lt, survival_probability),
-        )
+        return (rel_total_time, FPE.t / lt_translational_estimate, (sim_lt, survival_probability))
     else:
         return (rel_total_time, FPE.t / lt_translational_estimate)
 
-"""
 
 def correction(
     D_trans: float,
@@ -247,7 +264,7 @@ def correction(
                     # Deal with low values
                     if rel_d < cached_displ_set[0]:
                         interp_weight = (
-                            rel_d * cache_inter_func[0](rel_D) + (cached_displ_set[0]-rel_d) *1.)/cached_displ_set[0]
+                            rel_d * cache_inter_func[0](rel_D) + (cached_displ_set[0]-rel_d) * 1.)/cached_displ_set[0]
                         return (interp_weight * (1.-ref_limit))+ref_limit
 
                     # Deal with upper convergence
