@@ -4,18 +4,54 @@
 
 
 This repository contains scripts and cached calculation results for the analysis of anisotropic interface-perpendicular diffusion in film geometries and slit pores.
-It most notably contains the scripts to calculate the universal correction function `R(\nu,q)` as presented in the accompanying publication: (TODO: add DOI and bibtex).
+It most notably contains  a script to calculate the first-order drift correction function `K_B(\gamma)` for bulk-like slabs as presented in the first accompanying publication listed below.
+It also contains the scripts to calculate the universal correction functions `R_B(\nu,q)` and `R_LV(\nu,q)` as presented in the second accompanying publication listed below.
 The scripts are provided free of charge, as-is to be used in scientific work and educational context. 
 
-If you use the technique presented in the accompanying publication or the scripts in this repository for your own publication, please cite:
+If you use the technique presented in the accompanying publication or the scripts in this repository for your own publication, please cite the following publications depending on the aspects of the code you are using.
+
+* For use of the lifetime diffusion analysis method for point-like particles and/or the correction of lifetime based diffusion for drift, please cite:
 
 ```
-@article{
-    TODO: add bibtex references
+Publication I:
+@article{hollring2023anisotropic1,
+  title={Anisotropic molecular diffusion in confinement I: Transport of small particles in potential and density gradients},
+  author={H{\"o}llring, Kevin and Baer, Andreas and Vu{\v{c}}emilovi{\'c}-Alagi{\'c}, Nata{\v{s}}a and Smith, David M and Smith, Ana-Sun{\v{c}}ana},
+  journal={Journal of Colloid and Interface Science},
+  volume={650},
+  pages={1930--1940},
+  year={2023},
+  publisher={Elsevier}
 }
 ```
 
-## The correction function
+In this publication, we introduce the concept of lifetime-based diffusion analysis in confinement and deal with the quantification of the effect of drift induced by an effective potential on the observed lifetime statistics.
+
+* For use of the lifetime diffusion analysis of extensive particles, i.e. the universal correction function for either bulk or interface-adjacent slices, or the correction for drift in complex particles,  please cite:
+
+```
+Publication II:
+@article{hollring2023anisotropic2,
+  title={Anisotropic molecular diffusion in confinement II:  A model for structurally complex particles applied to transport in thin ionic liquid films},
+  author={H{\"o}llring, Kevin and Baer, Andreas and Vu{\v{c}}emilovi{\'c}-Alagi{\'c}, Nata{\v{s}}a and Smith, David M and Smith, Ana-Sun{\v{c}}ana},
+  journal={Journal of Colloid and Interface Science},
+  volume={TBD},
+  pages={TBD},
+  year={2023},
+  publisher={Elsevier}
+}
+```
+
+In this publication, we discuss necessary adaptations of the lifetime based diffusion analysis procedure for the analysis of extensive particles with complex internal degrees of freedom in confinement. 
+We extend the drift-correction from the first publication to this more complex scenario and discuss the impact of additional degrees of freedom on lifetime statistics.
+
+## Correcting for drift 
+
+As presented in Publication I, the relative correction for drift induced by an effective potential in confinement can be analytically derived as a function `K_B(\gamma)`, where `\gamma` is a value resulting from a combination of the slope of the effective potential derived from the logarithmic density distribution in the system as well as the chosen slice thickness `L`.
+The script to calculate `K_B` can be found at `./scripts/drift_correction_function.py`.
+
+
+## The universal correction function for bulk-like slabs
 
 ### Cached data
 
@@ -68,3 +104,8 @@ The function returns a pair of values `(R, t_sim/\tau_SPM)` if `return_detailed_
 
 If instead `return_detailed_stats` is set to `True`, then a triple of values is returned `(R, t_sim/\tau_SPM, (sim_lt, survival_probability))`, where the first two entries are identical with the case of `return_detailed_stats=False`, but the third entry is a pair of two arrays, one with the time variable `sim_lt` and the second containing the respective survival probabilities `P(sim_lt)` that a particle within the slice at time `t=0` has not left the slice until time `sim_lt`.
 Both arrays are of equal length and contain corresponding entries.
+
+## The universal correction function for interface-adjacent slabs
+
+For slices of the system immediatel adjacent to vacuum-like interfaces (i.e. with no strong liquid-interface interactions), we also provide the script to calculate `R_LV(\nu,q)`.
+The script can be found at `./scripts/lv_correction_function.py`.
