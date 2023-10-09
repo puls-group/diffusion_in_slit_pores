@@ -1,0 +1,12 @@
+# This is the local cache file for already calculated entries of the universal correction function of LV-like interface slices R_LV(\nu,q).
+#
+# The most relevant columns are the first three:
+# The first column is the value of q=d_mol/L, the relative deformation amplitude 
+# The second column is the value of \nu = D_mol / D_\perp, the relative deformation diffusion speed
+# The third column is the derived value of R_LV(\nu,q)
+# The fourth column is for debugging, denoting how much time has been simulated before applying the long-term extrapolation. It is provided as a relative scale based on the SPM lifetime prediction for an LV slice
+# The fifth column denotes how many real-world seconds it took to simulate the EPM system to calculate R_LV(\nu,q)
+#
+# The script written to calculate these values as well as stitch these cached values together for better usability can be found in ./scripts/bulk_correction_function.py
+#
+# relative displacement (q)	#relative deform diffusion (\nu)	#relative lifetime compared to expected lifetime R_LV(\nu,q)	#simulated time relative to expected lifetime	#time spent during simulation [s]

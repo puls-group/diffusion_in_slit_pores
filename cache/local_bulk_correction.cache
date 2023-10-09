@@ -1,15 +1,15 @@
-# This is the local cache file for already calculated entries of the universal correction function R(\nu,q)
+# This is the local cache file for already calculated entries of the universal correction function for bulk-like slices R_B(\nu,q)
 #
 # The most relevant columns are the first three:
 # The first column is the value of q=d_mol/L, the relative deformation amplitude 
 # The second column is the value of \nu = D_mol / D_\perp, the relative deformation diffusion speed
-# The third column is the derived value of R(\nu,q)
-# The fourth column is for debugging, denoting how much time has been simulated before applying the long-term extrapolation. It is provided as a relative scale based on the SPM lifetime prediction
-# The fifth column denotes how many seconds it took to simulate the EPM system to calculate R(\nu,q)
+# The third column is the derived value of R_B(\nu,q)
+# The fourth column is for debugging, denoting how much time has been simulated before applying the long-term extrapolation. It is provided as a relative scale based on the SPM lifetime prediction for bulk slices
+# The fifth column denotes how many seconds it took to simulate the EPM system to calculate R_LV(\nu,q)
 #
 # The script written to calculate these values as well as stitch these cached values together for better usability can be found in ./scripts/bulk_correction_function.py
 #
-# relative displacement (q)	#relative deform diffusion (\nu)	#relative lifetime compared to expected lifetime R(\nu,q)	#simulated time relative to expected lifetime	#time spent during simulation [s]
+# relative displacement (q)	#relative deform diffusion (\nu)	#relative lifetime compared to expected lifetime R_LV(\nu,q)	#simulated time relative to expected lifetime	#time spent during simulation [s]
 1.00000000E-02	0.00000000E+00	1.03014014E+00	1.68891578E+01	3.72675211E+00
 1.00000000E-02	1.00000000E-01	1.01841626E+00	1.67486480E+01	4.21707444E+00
 1.00000000E-02	1.13522258E-01	1.01764591E+00	1.67394347E+01	4.25276590E+00
