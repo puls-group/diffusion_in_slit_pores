@@ -214,8 +214,11 @@ def correction(
                     cache_inter_func = []
                     cache_inter_displ = []
 
-                    # Build interpolation functions:
+                    # Setup baseline entries for no displacement, i.e. no impact of deformation
+                    cache_inter_func.append(lambda x: 1.)
+                    cache_inter_displ.append(0.)
 
+                    # Build interpolation functions:
                     for i in range(len(cached_displ_set)):
                         picked_displ = cached_displ_set[i]
 
@@ -235,25 +238,16 @@ def correction(
                         picked_lt = picked_data[:, 2]
                         picked_lt = picked_lt/max(1.0, np.max(picked_lt))
 
-                        limit = (
-                            1.-2.*picked_displ)**3 if picked_displ < 0.5 else 0.0
-
-                        # We do relative interpolation between 1 and (1-2r)^3 limits
-                        picked_weight = (picked_lt-limit)/(1.-limit)
-
                         interpolator = interp1d(
-                            picked_diff, picked_weight, fill_value=(1.0, 0.0), bounds_error=False)
+                            picked_diff, picked_lt, fill_value=(1.0, 0.0), bounds_error=False)
 
                         upper_value_index = np.argmax(picked_diff)
                         upper_diff = picked_diff[upper_value_index]
-                        upper_weight = (
-                            picked_lt[upper_value_index]-limit)/(1.-limit)
 
+                        # We generally use a linear interpolator between our values
+                        # At fast deformation modes, we do not have an analytic prediction of convergence behavior
                         def f(x):
-                            if x < upper_diff:
-                                return interpolator(x)
-                            else:
-                                return (upper_weight * upper_diff / x)
+                            return interpolator(x)
 
                         cache_inter_func.append(f)
                         cache_inter_displ.append(cached_displ_set[i])
@@ -261,34 +255,31 @@ def correction(
                 def apply_cache_data(rel_d, rel_D):
                     ref_limit = (1.-2.*rel_d)**3 if rel_d < 0.5 else 0.0
 
-                    # Deal with low values
-                    if rel_d < cached_displ_set[0]:
-                        interp_weight = (
-                            rel_d * cache_inter_func[0](rel_D) + (cached_displ_set[0]-rel_d) * 1.)/cached_displ_set[0]
-                        return (interp_weight * (1.-ref_limit))+ref_limit
+                    # Deal with values outside the cache domain:
+                    if rel_d < cache_inter_displ[0] or rel_d > cache_inter_displ[-1]:
+                        # We do not know how to extrapolate behavior outside cached boundaries for lv like slices
+                        return None
 
-                    # Deal with upper convergence
-                    if rel_d >= cached_displ_set[-1]:
-                        interp_weight = cache_inter_func[-1](rel_D)
-                        return interp_weight
-
-                    # Interpolate in between
+                    # Interpolate within the cached domain
                     for i in range(len(cached_displ_set)-1):
-                        if rel_d >= cached_displ_set[i] and rel_d < cached_displ_set[i+1]:
-                            diff_displ = cached_displ_set[i+1] - \
-                                cached_displ_set[i]
-                            # We interpolate linearly for the weight in between 1 and (1-2r)**3:
-                            interp_weight = ((cached_displ_set[i+1]-rel_d) *
-                                             cache_inter_func[i](
-                                rel_D) + (rel_d-cached_displ_set[i]) *
-                                cache_inter_func[i+1](
-                                    rel_D))/diff_displ
-                            # Then calculate the actual approximation from the interpolation
-                            return (interp_weight * (1.-ref_limit))+ref_limit
+                        if rel_d >= cached_displ_set[i] and rel_d <= cached_displ_set[i+1]:
+                            displacement_step = cached_displ_set[i +
+                                                                 1] - cached_displ_set[i]
+
+                            lower_displ_estimate = cache_inter_func[i](rel_D)
+                            upper_displ_estimate = cache_inter_func[i+1](rel_D)
+
+                            # We interpolate linearly between the two displacements
+                            interpolated_estimate = ((cached_displ_set[i+1]-rel_d) * lower_displ_estimate
+                                                     + (rel_d-cached_displ_set[i]) * upper_displ_estimate)/displacement_step
+
+                            return interpolated_estimate
                 loaded_cache_data = apply_cache_data
 
-            # if rel_displacement <= cache_limit:
-            return loaded_cache_data(rel_displacement, rel_diffusion)
+            res = loaded_cache_data(rel_displacement, rel_diffusion)
+            # Only use the cache if we get a cached result
+            if res is not None:
+                return res
 
     else:
         with open(local_cache_path, "w") as cache_out:
@@ -322,4 +313,3 @@ def correction(
         )
 
     return total_rel_time
-
