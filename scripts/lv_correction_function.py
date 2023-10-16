@@ -99,19 +99,16 @@ def simulate_fpe_for(rel_displacement: float,
             g = (D_displacement * (W3 - W4)) / \
                 (2.0 * (D_displacement + D_translational))
 
-            # FIXME: No factor 2 because there is only flow in one of two possible directions?
             # diff_z[s, z] = 2.0 * D_t * ((W2 - W0) - g)
             diff_z[s, z] = D_translational * (W2 - W0) - D_translational * g
             # diff_s[s, z] = 2.0 * D_displacement * (W1 - W0) - D_t * g
             diff_s[s, z] = D_displacement * (W1 - W0) - D_translational * g
 
         # Deal with z-reflection at left side bottom corner
-        # FIXME: No factor 2 because there is only flow in one of two possible directions?
         # diff_z[-1, dim_d] = 2.0 * D_translational * (y[-1, dim_d + 1] - y[-1, dim_d])
         diff_z[-1, dim_d] = D_translational * (y[-1, dim_d + 1] - y[-1, dim_d])
 
         # Deal with s-reflection at left side middle corner
-        # FIXME: No factor 2 because there is only flow in one of two possible directions?
         # diff_z[-1, dim_d] = 2.0 * D_t * (y[-1, dim_d + 1] - y[-1, dim_d])
         diff_s[dim_d, 0] = D_translational * (y[dim_d-1, 0] - y[dim_d, 0])
 
@@ -241,19 +238,24 @@ def correction(
                         interpolator = interp1d(
                             picked_diff, picked_lt, fill_value=(1.0, 0.0), bounds_error=False)
 
-                        upper_value_index = np.argmax(picked_diff)
-                        upper_diff = picked_diff[upper_value_index]
+                        low_interpolator = interp1d(
+                            [0, picked_diff[0]], [1.0, picked_lt[0]])
 
                         # We generally use a linear interpolator between our values
                         # At fast deformation modes, we do not have an analytic prediction of convergence behavior
-                        def f(x):
-                            return interpolator(x)
+                        def f(x, lower_bound=picked_diff[0], low_interpolator=low_interpolator, interpolator=interpolator, i=i):
+                            if x <= lower_bound:
+                                return low_interpolator(x)
+                            else:
+                                return interpolator(x)
 
                         cache_inter_func.append(f)
                         cache_inter_displ.append(cached_displ_set[i])
 
                 def apply_cache_data(rel_d, rel_D):
-                    ref_limit = (1.-2.*rel_d)**3 if rel_d < 0.5 else 0.0
+                    # Little displacement will give identity
+                    if abs(rel_d) < cache_inter_displ[0]:
+                        return 1.0
 
                     # Deal with values outside the cache domain:
                     if rel_d < cache_inter_displ[0] or rel_d > cache_inter_displ[-1]:
@@ -261,17 +263,17 @@ def correction(
                         return None
 
                     # Interpolate within the cached domain
-                    for i in range(len(cached_displ_set)-1):
-                        if rel_d >= cached_displ_set[i] and rel_d <= cached_displ_set[i+1]:
-                            displacement_step = cached_displ_set[i +
-                                                                 1] - cached_displ_set[i]
+                    for i in range(len(cache_inter_displ)-1):
+                        if rel_d >= cache_inter_displ[i] and rel_d <= cache_inter_displ[i+1]:
+                            displacement_step = cache_inter_displ[i +
+                                                                  1] - cache_inter_displ[i]
 
                             lower_displ_estimate = cache_inter_func[i](rel_D)
                             upper_displ_estimate = cache_inter_func[i+1](rel_D)
 
                             # We interpolate linearly between the two displacements
-                            interpolated_estimate = ((cached_displ_set[i+1]-rel_d) * lower_displ_estimate
-                                                     + (rel_d-cached_displ_set[i]) * upper_displ_estimate)/displacement_step
+                            interpolated_estimate = ((cache_inter_displ[i+1]-rel_d) * lower_displ_estimate
+                                                     + (rel_d-cache_inter_displ[i]) * upper_displ_estimate)/displacement_step
 
                             return interpolated_estimate
                 loaded_cache_data = apply_cache_data
