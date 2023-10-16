@@ -1,6 +1,6 @@
 # Extracting diffusion profiles of particles in slit pores
 
-[![DOI](https://zenodo.org/badge/575549132.svg)](https://zenodo.org/badge/latestdoi/575549132)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10008295.svg)](https://doi.org/10.5281/zenodo.10008295)
 
 
 This repository contains scripts and cached calculation results for the analysis of anisotropic interface-perpendicular diffusion in film geometries and slit pores.
