@@ -228,7 +228,7 @@ def correction(
                         upper_weight = (
                             picked_lt[upper_value_index]-limit)/(1.-limit)
 
-                        def f(x):
+                        def f(x, upper_diff=upper_diff, interpolator=interpolator, upper_weight=upper_weight):
                             if x < upper_diff:
                                 return interpolator(x)
                             else:
@@ -243,7 +243,7 @@ def correction(
                     # Deal with low values
                     if rel_d < cached_displ_set[0]:
                         interp_weight = (
-                            rel_d * cache_inter_func[0](rel_D) + (cached_displ_set[0]-rel_d) *1.)/cached_displ_set[0]
+                            rel_d * cache_inter_func[0](rel_D) + (cached_displ_set[0]-rel_d) * 1.)/cached_displ_set[0]
                         return (interp_weight * (1.-ref_limit))+ref_limit
 
                     # Deal with upper convergence
@@ -301,4 +301,3 @@ def correction(
         )
 
     return total_rel_time
-
