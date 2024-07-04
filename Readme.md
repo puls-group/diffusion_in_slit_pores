@@ -14,14 +14,23 @@ If you use the technique presented in the accompanying publication or the script
 
 ```
 Publication I:
-@article{hollring2023anisotropic1,
-  title={Anisotropic molecular diffusion in confinement I: Transport of small particles in potential and density gradients},
-  author={H{\"o}llring, Kevin and Baer, Andreas and Vu{\v{c}}emilovi{\'c}-Alagi{\'c}, Nata{\v{s}}a and Smith, David M and Smith, Ana-Sun{\v{c}}ana},
-  journal={Journal of Colloid and Interface Science},
-  volume={650},
-  pages={1930--1940},
-  year={2023},
-  publisher={Elsevier}
+@article{hoellring2023anisotropicI,
+title = {Anisotropic molecular diffusion in confinement I: Transport of small particles in potential and density gradients},
+journal = {Journal of Colloid and Interface Science},
+volume = {650},
+pages = {1930-1940},
+year = {2023},
+issn = {0021-9797},
+doi = {https://doi.org/10.1016/j.jcis.2023.07.088},
+url = {https://www.sciencedirect.com/science/article/pii/S0021979723013371},
+author = {Kevin Höllring and Andreas Baer and Nataša Vučemilović-Alagić and David M. Smith and Ana-Sunčana Smith},
+keywords = {Transport coefficient, Diffusion in pores, Porous materials, Anisotropic diffusion, Diffusion at interfaces, Drift and density gradient},
+abstract = {Hypothesis
+Diffusion in confinement is an important fundamental problem with significant implications for applications of supported liquid phases. However, resolving the spatially dependent diffusion coefficient, parallel and perpendicular to interfaces, has been a standing issue. In the vicinity of interfaces, density fluctuations as a consequence of layering locally impose statistical drift, which impedes the analysis of spatially dependent diffusion coefficients even further. We hypothesise, that we can derive a model to spatially resolve interface-perpendicular diffusion coefficients based on local lifetime statistics with an extension to explicitly account for the effect of local drift using the Smoluchowski equation, that allows us to resolve anisotropic and spatially dependent diffusivity landscapes at interfaces.
+Methods and simulations
+An analytic relation between local crossing times in system slices and diffusivity as well as an explicit term for calculating drift-induced systematic errors is presented. The method is validated on Molecular Dynamics simulations of bulk water and applied to simulations of water in slit pores.
+Findings
+After validation on bulk liquids, we clearly demonstrate the anisotropic nature of diffusion coefficients at interfaces. Significant spatial variations in the diffusivities correlate with interface-induced structuring but cannot be solely attributed to the drift induced by local density fluctuations.}
 }
 ```
 
@@ -31,14 +40,23 @@ In this publication, we introduce the concept of lifetime-based diffusion analys
 
 ```
 Publication II:
-@article{hollring2023anisotropic2,
-  title={Anisotropic molecular diffusion in confinement II:  A model for structurally complex particles applied to transport in thin ionic liquid films},
-  author={H{\"o}llring, Kevin and Baer, Andreas and Vu{\v{c}}emilovi{\'c}-Alagi{\'c}, Nata{\v{s}}a and Smith, David M and Smith, Ana-Sun{\v{c}}ana},
-  journal={Journal of Colloid and Interface Science},
-  volume={TBD},
-  pages={TBD},
-  year={2023},
-  publisher={Elsevier}
+@article{hoellring2024anisotropicII,
+title = {Anisotropic molecular diffusion in confinement II: A model for structurally complex particles applied to transport in thin ionic liquid films},
+journal = {Journal of Colloid and Interface Science},
+volume = {657},
+pages = {272-289},
+year = {2024},
+issn = {0021-9797},
+doi = {https://doi.org/10.1016/j.jcis.2023.11.137},
+url = {https://www.sciencedirect.com/science/article/pii/S0021979723022609},
+author = {Kevin Höllring and Andreas Baer and Nataša Vučemilović-Alagić and David M. Smith and Ana-Sunčana Smith},
+keywords = {Transport coefficient, Molecular liquids, Diffusion in films, Ionic liquids, Anisotropic diffusion, Diffusion at interfaces},
+abstract = {Hypothesis
+Diffusion in confinement is an important fundamental problem with significant implications for applications of supported liquid phases. However, resolving the spatially dependent diffusion coefficient, parallel and perpendicular to interfaces, has been a standing issue and for objects of nanometric size, which structurally fluctuate on a similar time scale as they diffuse, no methodology has been established so far. We hypothesise that the complex, coupled dynamics can be captured and analysed by using a model built on the 2-dimensional Smoluchowski equation and systematic coarse-graining.
+Methods and simulations
+For large, flexible species, a universal approach is offered that does not make any assumptions about the separation of time scales between translation and other degrees of freedom. The method is validated on Molecular Dynamics simulations of bulk systems of a family of ionic liquids with increasing cation sizes where internal degrees of freedom have little to major effects.
+Findings
+After validation on bulk liquids, where we provide an interpretation of two diffusion constants for each species found experimentally, we clearly demonstrate the anisotropic nature of diffusion coefficients at interfaces. Spatial variations in the diffusivities relate to interface-induced structuring of the ionic liquids. Notably, the length scales in strongly confined ionic liquids vary consistently but differently at the solid–liquid and liquid–vapour interfaces.}
 }
 ```
 
